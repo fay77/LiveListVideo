@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:animateLayoutChanges="true"
+    android:layout_height="wrap_content">
+
+    <listvideo.ListVideoPlayer
+        android:layout_marginBottom="20dp"
+        android:id="@+id/player"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"/>
+
+    <ImageView
+        android:id="@+id/iv"
+        android:layout_marginBottom="20dp"
+        android:layout_width="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ss"
+        android:layout_height="300dp" />
+
+</RelativeLayout>
