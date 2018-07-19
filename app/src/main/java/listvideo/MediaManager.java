@@ -3,10 +3,12 @@ package listvideo;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.RequiresApi;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.ViewGroup;
@@ -119,6 +121,7 @@ public class MediaManager implements TextureView.SurfaceTextureListener {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
         if (savedSurfaceTexture == null) {
