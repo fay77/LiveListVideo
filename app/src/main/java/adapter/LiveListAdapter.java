@@ -5,10 +5,14 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 
 import com.example.hunliji.livelistvideoplayer.R;
@@ -18,6 +22,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import listvideo.ListVideoPlayer;
+import listvideo.ListVideoPlayerManager;
 import utils.CommonUtil;
 
 /**
@@ -27,10 +32,16 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
 
     private List<String> mUrls;
     private Context mContext;
+    private OnModeChange onModeChange;
 
     public LiveListAdapter(List<String> mUrls, Context context) {
         this.mUrls = mUrls;
         this.mContext = context;
+    }
+
+
+    public void setOnModeChange(OnModeChange onModeChange) {
+        this.onModeChange = onModeChange;
     }
 
     @NonNull
@@ -42,29 +53,58 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
         return new ViewHolder(view);
     }
 
+    public interface OnModeChange {
+        void modeChange(int mode);
+    }
+
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+
         if (TextUtils.isEmpty(mUrls.get(position))) {
             return;
         }
         holder.listVideoPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (ListVideoPlayerManager.getCurrentMode() == ListVideoPlayer.Mode.FULL_SCREEN) {
+                    Toast.makeText(mContext, "hhhh", Toast.LENGTH_SHORT)
+                            .show();
+                    return;
+                }
                 holder.listVideoPlayer.startVideo();
+            }
+        });
+
+        holder.fullBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                holder.listVideoPlayer.enterFullScreen();
             }
         });
 
         if (!TextUtils.isEmpty(mUrls.get(position))) {
             holder.listVideoPlayer.setVisibility(View.VISIBLE);
             holder.listVideoPlayer.setSource(Uri.parse(mUrls.get(position)));
-            holder.listVideoPlayer.setOnStateChangeListener(new ListVideoPlayer.OnStateChangeListener() {
+            holder.listVideoPlayer.setOnModeChangeListener(new ListVideoPlayer
+                    .OnModeChangeListener() {
+                @Override
+                public void OnModeChange(int mode) {
+                    if (onModeChange != null) {
+                        onModeChange.modeChange(mode);
+                    }
+                }
+            });
+            holder.listVideoPlayer.setOnStateChangeListener(new ListVideoPlayer
+                    .OnStateChangeListener() {
                 @Override
                 public void OnStateChange(int state) {
+                    Log.d("gaofenghlj", state + "");
                     switch (state) {
                         case ListVideoPlayer.STATE.ERROR:
                         case ListVideoPlayer.STATE.NORMAL:
                         case ListVideoPlayer.STATE.COMPLETE:
                             holder.mBgIv.setVisibility(View.VISIBLE);
+                            Log.d("fff", "播放结束了");
                             break;
                         case ListVideoPlayer.STATE.PREPARING:
                         case ListVideoPlayer.STATE.PLAYING:
@@ -91,12 +131,16 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
         ListVideoPlayer listVideoPlayer;
         @BindView(R.id.iv)
         ImageView mBgIv;
+        @BindView(R.id.full_btn)
+        Button fullBtn;
+
 
         public ViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
 
         }
+
     }
 }
 

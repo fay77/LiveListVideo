@@ -1,6 +1,7 @@
 package listvideo;
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
@@ -8,7 +9,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -32,6 +35,12 @@ public class ListVideoPlayer extends FrameLayout {
         public static final int COMPLETE = 4;
     }
 
+    public class Mode {
+        public static final int FULL_SCREEN = 1001;
+        public static final int TINY_SCREEN = 0;
+
+    }
+
 
     public enum ScaleType {
         FIT_CENTER,
@@ -43,10 +52,14 @@ public class ListVideoPlayer extends FrameLayout {
 
     private Uri source;
     private int currentState;
+    private int currentMode;
+    private ViewGroup viewGroup;
 
     private ScaleType scaleType= ScaleType.CENTER_CROP;
 
     private OnStateChangeListener onStateChangeListener;
+
+    private OnModeChangeListener onModeChangeListener;
 
     private OnBufferingUpdateListener onBufferingUpdateListener;
 
@@ -100,7 +113,66 @@ public class ListVideoPlayer extends FrameLayout {
         }
     }
 
+    public void enterFullScreen() {
+        if (currentMode == Mode.FULL_SCREEN)
+            return;
+        currentMode = Mode.FULL_SCREEN;
+        if (onModeChangeListener != null) {
+            onModeChangeListener.OnModeChange(currentMode);
+        }
+        Log.d("fff", "进入全屏了" + currentMode);
 
+        // 隐藏ActionBar、状态栏，并横屏
+        //        NiceUtil.hideActionBar(mContext);
+        //        NiceUtil.scanForActivity(mContext)
+        //                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        VideoUtil.scanForActivity(getContext())
+                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        ViewGroup contentView = (ViewGroup) VideoUtil.scanForActivity(getContext())
+                .findViewById(android.R.id.content);
+        if (currentMode == Mode.TINY_SCREEN) {
+            contentView.removeView(textureContainer);
+        } else {
+            this.removeView(textureContainer);
+        }
+        LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        viewGroup = (ViewGroup) textureContainer.getParent();
+        if (viewGroup != null) {
+            viewGroup.removeView(textureContainer);
+        }
+        contentView.addView(textureContainer, params);
+
+    }
+
+    public boolean exitFullScreen() {
+        if (currentMode == Mode.FULL_SCREEN) {
+            currentMode = Mode.TINY_SCREEN;
+            if (onModeChangeListener != null) {
+                onModeChangeListener.OnModeChange(currentMode);
+            }
+
+            //            NiceUtil.showActionBar(mContext);
+            //            NiceUtil.scanForActivity(mContext)
+            //                    .setRequestedOrientation(ActivityInfo
+            // .SCREEN_ORIENTATION_PORTRAIT);
+            VideoUtil.scanForActivity(getContext())
+                    .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            ViewGroup contentView = (ViewGroup) VideoUtil.scanForActivity(getContext())
+                    .findViewById(android.R.id.content);
+            contentView.removeView(textureContainer);
+            LayoutParams params = new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
+            viewGroup.addView(textureContainer, params);
+            //            this.addView(textureContainer, params);
+
+
+
+
+            return true;
+        }
+        return false;
+    }
     public void startVideo() {
         if (source == null) {
             return;
@@ -232,10 +304,18 @@ public class ListVideoPlayer extends FrameLayout {
         return currentState;
     }
 
+    public int getCurrentMode() {
+        return currentMode;
+    }
 
     public void setOnStateChangeListener(OnStateChangeListener onStateChangeListener) {
         this.onStateChangeListener = onStateChangeListener;
         this.onStateChangeListener.OnStateChange(currentState);
+    }
+
+    public void setOnModeChangeListener(OnModeChangeListener onModeChangeListener) {
+        this.onModeChangeListener = onModeChangeListener;
+        this.onModeChangeListener.OnModeChange(currentMode);
     }
 
     public interface OnStateChangeListener {
@@ -243,7 +323,12 @@ public class ListVideoPlayer extends FrameLayout {
         void OnStateChange(int state);
     }
 
+    public interface OnModeChangeListener {
+        void OnModeChange(int mode);
+    }
+
     public interface OnBufferingUpdateListener {
+
 
         void onBufferingUpdate(int state);
     }

@@ -2,6 +2,7 @@ package listvideo;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;
+import android.util.Log;
 
 public class ListVideoPlayerManager {
 
@@ -26,6 +27,7 @@ public class ListVideoPlayerManager {
                     break;
                 case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                     try {
+                        Log.d("gaofenghlj", "AudioManager.OnAudioFocusChangeListener");
                         onPlayPause();
                     } catch (IllegalStateException e) {
                         e.printStackTrace();
@@ -46,6 +48,13 @@ public class ListVideoPlayerManager {
 
     public static ListVideoPlayer getCurrentVideo() {
         return currentVideoView;
+    }
+
+    public static int getCurrentMode() {
+        if (getCurrentVideo() != null) {
+            return getCurrentVideo().getCurrentMode();
+        }
+        return 0;
     }
 
 

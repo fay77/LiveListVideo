@@ -55,6 +55,8 @@ public class ListVideoVisibleTracker {
             if (currentState == SCROLL_STATE_IDLE) {
                 findVisibleVideoView();
             } else {
+                Log.d("gaofenghlj", "onScrolled");
+
                 ListVideoPlayerManager.onPlayPause();
             }
         }
@@ -71,6 +73,7 @@ public class ListVideoVisibleTracker {
         public void onScroll(int currentY, int maxY) {
             if (lastY != currentY) {
                 lastY = currentY;
+                Log.d("gaofenghlj", "onScroll tracker");
                 ListVideoPlayerManager.onPlayPause();
                 CommonUtil.unSubscribeSubs(visibleVideoViewSubscription);
                 findVisibleVideoView();
@@ -209,9 +212,15 @@ public class ListVideoVisibleTracker {
                                 nestRectView=rectView;
                                 break;
                             }
-                            if (nestRectView != null) {
+                            if (ListVideoPlayerManager.getCurrentMode() == ListVideoPlayer.Mode
+                                    .FULL_SCREEN) {
+                                return;
+                            }
+                            if (nestRectView != null ) {
                                 playVideoView((ListVideoPlayer) nestRectView.view);
-                            } else if (onPause) {
+                            } else if (onPause ) {
+                                Log.d("gaofenghlj", "onScroll tracker else if (onPause)");
+
                                 ListVideoPlayerManager.onPlayPause();
                             } else {
                                 ListVideoPlayerManager.releaseAllVideos();
