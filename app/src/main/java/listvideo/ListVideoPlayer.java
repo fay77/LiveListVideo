@@ -226,11 +226,11 @@ public class ListVideoPlayer extends FrameLayout {
     }
 
     public void onPrepared() {
-        long position = VideoUtil.getSavedProgress(getContext(), source.toString());
-        if (position > 0) {
-            MediaManager.INSTANCE()
-                    .seekTo((int) position);
-        }
+//        long position = VideoUtil.getSavedProgress(getContext(), source.toString());
+//        if (position > 0) {
+//            MediaManager.INSTANCE()
+//                    .seekTo((int) position);
+//        }
         onPlaying();
     }
 
@@ -467,6 +467,7 @@ public class ListVideoPlayer extends FrameLayout {
         }
         int currentPosition = MediaManager.INSTANCE()
                 .getCurrentPosition();
+        Log.d("jingtian", "当前进度是------》" + currentPosition + "");
 
         //更新进度
         long duration = MediaManager.INSTANCE()
@@ -511,6 +512,7 @@ public class ListVideoPlayer extends FrameLayout {
                     }
                     int currentPosition = MediaManager.INSTANCE()
                             .getCurrentPosition();
+                    Log.d("jingtian", "当前进度是------》handleMessage" + currentPosition + "");
 
                     //更新进度
                     long duration = MediaManager.INSTANCE()
