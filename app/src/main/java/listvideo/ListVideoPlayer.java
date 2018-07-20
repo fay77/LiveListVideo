@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
@@ -19,14 +21,18 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 
 import com.example.hunliji.livelistvideoplayer.R;
+
+import java.lang.ref.WeakReference;
 
 import utils.VideoUtil;
 
 
 public class ListVideoPlayer extends FrameLayout {
+    private static final int MSG_UPDATE_TIME_PROGRESS = 100;
 
     public class STATE {
         public static final int ERROR = -1;
@@ -51,11 +57,16 @@ public class ListVideoPlayer extends FrameLayout {
 
     FrameLayout textureContainer;
     ProgressBar loadingBar;
+    private UpdateTimeHandler handler;
+
 
     private Uri source;
     private int currentState;
     private int currentMode;
     private ViewGroup viewGroup;
+    private SeekBar mSeekBar;
+    private TextView mPositionTimeTv;
+    private TextView mDurationTimeTv;
 
     private ScaleType scaleType= ScaleType.CENTER_CROP;
 
@@ -112,6 +123,9 @@ public class ListVideoPlayer extends FrameLayout {
         }
         this.source = source;
         currentState = STATE.NORMAL;
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
         if (onStateChangeListener != null) {
             onStateChangeListener.OnStateChange(currentState);
         }
@@ -202,6 +216,9 @@ public class ListVideoPlayer extends FrameLayout {
         MediaManager.INSTANCE()
                 .setSource(source);
         currentState = STATE.PREPARING;
+        if (onStateChangeListener != null) {
+            onStateChangeListener.OnStateChange(currentState);
+        }
         loadingBar.setVisibility(VISIBLE);
         if (onStateChangeListener != null) {
             onStateChangeListener.OnStateChange(currentState);
@@ -219,6 +236,9 @@ public class ListVideoPlayer extends FrameLayout {
 
     public void onPlaying() {
         currentState = STATE.PLAYING;
+        if (handler != null) {
+            updatePlayTimeAndProgress();
+        }
         MediaManager.INSTANCE()
                 .start();
         loadingBar.setVisibility(GONE);
@@ -229,6 +249,9 @@ public class ListVideoPlayer extends FrameLayout {
 
     public void onPause() {
         currentState = STATE.PAUSE;
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
         MediaManager.INSTANCE()
                 .pause();
         loadingBar.setVisibility(GONE);
@@ -250,6 +273,9 @@ public class ListVideoPlayer extends FrameLayout {
     public void onCompletion() {
         System.gc();
         currentState = STATE.COMPLETE;
+        if (handler != null) {
+            handler.removeCallbacksAndMessages(null);
+        }
         MediaManager.INSTANCE()
                 .releaseMediaPlayer();
         VideoUtil.saveProgress(getContext(), source.toString(), 0);
@@ -314,6 +340,11 @@ public class ListVideoPlayer extends FrameLayout {
                 exitFullScreen();
             }
         });
+        mSeekBar = mControllerView.findViewById(R.id.seek);
+        mPositionTimeTv = mControllerView.findViewById(R.id.position);
+        mDurationTimeTv = mControllerView.findViewById(R.id.length);
+        mSeekBar.setOnSeekBarChangeListener(onSeekBarChangeListener);
+        handler = new UpdateTimeHandler(mSeekBar , mPositionTimeTv ,mDurationTimeTv );
         LayoutParams layoutParams = new LayoutParams(ViewGroup
                 .LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -394,5 +425,107 @@ public class ListVideoPlayer extends FrameLayout {
 
     public void setOnBufferingUpdateListener(OnBufferingUpdateListener onBufferingUpdateListener) {
         this.onBufferingUpdateListener = onBufferingUpdateListener;
+    }
+
+    private SeekBar.OnSeekBarChangeListener onSeekBarChangeListener = new SeekBar
+            .OnSeekBarChangeListener() {
+        //拖动的过程中调用
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+
+        }
+
+        //开始拖动的时候调用
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            //暂停视频的播放、停止时间和进度条的更新
+            MediaManager.INSTANCE()
+                    .pause();
+        }
+
+        //停止拖动时调用
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            //把视频跳转到对应的位置
+            int progress = seekBar.getProgress();
+            int duration = (int) MediaManager.INSTANCE()
+                    .getDuration();
+            int position = duration * progress / 100;
+            MediaManager.INSTANCE()
+                    .seekTo(position);
+            MediaManager.INSTANCE()
+                    .start();
+            updatePlayTimeAndProgress();
+        }
+    };
+
+    //更新播放的时间和进度
+    public void updatePlayTimeAndProgress() {
+        //获取目前播放的进度
+        if (mSeekBar.getVisibility() == View.GONE) {
+            mSeekBar.setVisibility(View.VISIBLE);
+        }
+        int currentPosition = MediaManager.INSTANCE()
+                .getCurrentPosition();
+
+        //更新进度
+        long duration = MediaManager.INSTANCE()
+                .getDuration();
+        if (duration == 0) {
+            return;
+        }
+        long progress = 100 * currentPosition / duration;
+        mSeekBar.setProgress((int) progress);
+        mPositionTimeTv.setText(VideoUtil.formatTime(currentPosition));
+        mDurationTimeTv.setText(VideoUtil.formatTime(duration));
+        //发送一个更新的延时消息
+        handler.sendEmptyMessageDelayed(MSG_UPDATE_TIME_PROGRESS, 500);
+    }
+
+    private static class UpdateTimeHandler extends Handler {
+
+        private WeakReference<SeekBar> seekBarWeakReference;
+        private WeakReference<TextView> positionTimeTvWf;
+        private WeakReference<TextView> durationTimeTvWf;
+
+        UpdateTimeHandler(SeekBar seekBar , TextView positionTv , TextView durationTimeTv) {
+            seekBarWeakReference = new WeakReference<>(seekBar);
+            positionTimeTvWf = new WeakReference<>(positionTv);
+            durationTimeTvWf = new WeakReference<>(durationTimeTv);
+        }
+
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MSG_UPDATE_TIME_PROGRESS:
+                    SeekBar seekBar = seekBarWeakReference.get();
+                    TextView positionTimeTv = positionTimeTvWf.get();
+                    TextView durationTimeTv = durationTimeTvWf.get();
+                    if (seekBar == null) {
+                        return;
+                    }
+                    if (seekBar.getVisibility() == View.GONE) {
+                        seekBar.setVisibility(View.VISIBLE);
+                    }
+                    int currentPosition = MediaManager.INSTANCE()
+                            .getCurrentPosition();
+
+                    //更新进度
+                    long duration = MediaManager.INSTANCE()
+                            .getDuration();
+                    if (duration == 0) {
+                        return;
+                    }
+                    long progress = 100 * currentPosition / duration;
+                    seekBar.setProgress((int) progress);
+                    positionTimeTv.setText(VideoUtil.formatTime(currentPosition));
+                    durationTimeTv.setText(VideoUtil.formatTime(duration));
+                    //发送一个更新的延时消息
+                    this.sendEmptyMessageDelayed(MSG_UPDATE_TIME_PROGRESS, 500);
+                    break;
+            }
+        }
     }
 }
