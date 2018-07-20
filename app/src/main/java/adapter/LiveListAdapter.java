@@ -75,12 +75,6 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
             }
         });
 
-        holder.fullBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.listVideoPlayer.enterFullScreen();
-            }
-        });
 
         if (!TextUtils.isEmpty(mUrls.get(position))) {
             holder.listVideoPlayer.setVisibility(View.VISIBLE);
@@ -104,12 +98,19 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
                         case ListVideoPlayer.STATE.NORMAL:
                         case ListVideoPlayer.STATE.COMPLETE:
                             holder.mBgIv.setVisibility(View.VISIBLE);
+                            if (ListVideoPlayerManager.getCurrentMode() == ListVideoPlayer.Mode
+                                    .TINY_SCREEN) {
+                                ListVideoPlayerManager.hideController();
+                            }
+
                             Log.d("fff", "播放结束了");
                             break;
                         case ListVideoPlayer.STATE.PREPARING:
                         case ListVideoPlayer.STATE.PLAYING:
                         case ListVideoPlayer.STATE.PAUSE:
                             holder.mBgIv.setVisibility(View.GONE);
+                            ListVideoPlayerManager.showController();
+
                             break;
                     }
                 }
@@ -131,8 +132,6 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
         ListVideoPlayer listVideoPlayer;
         @BindView(R.id.iv)
         ImageView mBgIv;
-        @BindView(R.id.full_btn)
-        Button fullBtn;
 
 
         public ViewHolder(View itemView) {

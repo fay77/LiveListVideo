@@ -11,12 +11,14 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
+import android.widget.SeekBar;
 
 
 import com.example.hunliji.livelistvideoplayer.R;
@@ -62,6 +64,8 @@ public class ListVideoPlayer extends FrameLayout {
     private OnModeChangeListener onModeChangeListener;
 
     private OnBufferingUpdateListener onBufferingUpdateListener;
+
+    private View mControllerView;
 
     public ListVideoPlayer(@NonNull Context context) {
         super(context);
@@ -183,6 +187,7 @@ public class ListVideoPlayer extends FrameLayout {
         ListVideoPlayerManager.setCurrentVideo(this);
         initTextureView(scaleType);
         addTextureView();
+        addSeekBar();
         AudioManager mAudioManager = (AudioManager) getContext().getSystemService(Context
                 .AUDIO_SERVICE);
         if (mAudioManager != null) {
@@ -291,6 +296,43 @@ public class ListVideoPlayer extends FrameLayout {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 Gravity.CENTER);
         textureContainer.addView(MediaManager.INSTANCE().textureView, layoutParams);
+    }
+
+    public void addSeekBar() {
+        mControllerView = LayoutInflater.from(getContext())
+                .inflate(R.layout.tx_video_palyer_controller, null, false);
+        mControllerView.findViewById(R.id.full_screen).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enterFullScreen();
+            }
+
+        });
+        mControllerView.findViewById(R.id.back).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                exitFullScreen();
+            }
+        });
+        LayoutParams layoutParams = new LayoutParams(ViewGroup
+                .LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                Gravity.CENTER);
+        mControllerView.setVisibility(GONE);
+        textureContainer.addView(mControllerView, layoutParams);
+
+    }
+
+    public void hideController() {
+        if (mControllerView != null) {
+            mControllerView.setVisibility(GONE);
+        }
+    }
+
+    public void showController() {
+        if (mControllerView != null) {
+            mControllerView.setVisibility(VISIBLE);
+        }
     }
 
 

@@ -57,6 +57,18 @@ public class ListVideoPlayerManager {
         return 0;
     }
 
+    public static void showController() {
+        if (getCurrentVideo() != null) {
+            getCurrentVideo().showController();
+        }
+    }
+
+    public static void hideController() {
+        if (getCurrentVideo() != null) {
+            getCurrentVideo().hideController();
+        }
+    }
+
 
     public static void releaseAllVideos() {
         if (currentVideoView != null) {
