@@ -117,6 +117,9 @@ public class ListVideoPlayer extends FrameLayout {
         if (currentMode == Mode.FULL_SCREEN)
             return;
         currentMode = Mode.FULL_SCREEN;
+        if (currentState == STATE.PAUSE) {
+          onPlaying();
+        }
         if (onModeChangeListener != null) {
             onModeChangeListener.OnModeChange(currentMode);
         }
