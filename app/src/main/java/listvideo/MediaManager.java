@@ -62,6 +62,10 @@ public class MediaManager implements TextureView.SurfaceTextureListener {
         textureView.setSurfaceTextureListener(this);
     }
 
+    public ResizeTextureView getTextureView() {
+        return textureView;
+    }
+
     public void removeTextureView() {
         if (savedSurfaceTexture != null) {
             savedSurfaceTexture.release();
@@ -103,73 +107,77 @@ public class MediaManager implements TextureView.SurfaceTextureListener {
     }
 
     public int getCurrentPosition() {
-        return mediaPlayer.getCurrentPosition();
-    }
-
-    public long getDuration() {
-        return mediaPlayer.getDuration();
-    }
-
-    public void release() {
-        if (surface != null) {
-            surface.release();
+        if (null != mediaPlayer) {
+            if (!mediaPlayer.isPlaying()) {//如果不在播放状态，则停止更新
+                return 0;
+            }
+            return mediaPlayer.getCurrentPosition();
         }
-        removeTextureView();
-        if (textureView != null) {
-            textureView.setSurfaceTextureListener(null);
-            textureView = null;
-        }
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i1) {
-        if (savedSurfaceTexture == null) {
-            savedSurfaceTexture = surfaceTexture;
-            prepare();
-        } else {
-            textureView.setSurfaceTexture(savedSurfaceTexture);
-        }
-    }
-
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int w, int h) {
-    }
-
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
-        return savedSurfaceTexture == null;
-    }
-
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+        return 0;
 
     }
 
-
-    class MediaHandler extends Handler {
-        MediaHandler(Looper looper) {
-            super(looper);
+        public long getDuration () {
+            return mediaPlayer.getDuration();
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case HANDLER_PREPARE:
-                    mediaPlayer.prepare();
-                    if (savedSurfaceTexture != null) {
-                        if (surface != null) {
-                            surface.release();
+        public void release () {
+            if (surface != null) {
+                surface.release();
+            }
+            removeTextureView();
+            if (textureView != null) {
+                textureView.setSurfaceTextureListener(null);
+                textureView = null;
+            }
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN) @Override
+        public void onSurfaceTextureAvailable (SurfaceTexture surfaceTexture,int i, int i1){
+            if (savedSurfaceTexture == null) {
+                savedSurfaceTexture = surfaceTexture;
+                prepare();
+            } else {
+                textureView.setSurfaceTexture(savedSurfaceTexture);
+            }
+        }
+
+        @Override public void onSurfaceTextureSizeChanged (SurfaceTexture surfaceTexture,int w,
+        int h){
+        }
+
+        @Override public boolean onSurfaceTextureDestroyed (SurfaceTexture surfaceTexture){
+            return savedSurfaceTexture == null;
+        }
+
+        @Override public void onSurfaceTextureUpdated (SurfaceTexture surfaceTexture){
+
+        }
+
+
+        class MediaHandler extends Handler {
+            MediaHandler(Looper looper) {
+                super(looper);
+            }
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                switch (msg.what) {
+                    case HANDLER_PREPARE:
+                        mediaPlayer.prepare();
+                        if (savedSurfaceTexture != null) {
+                            if (surface != null) {
+                                surface.release();
+                            }
+                            surface = new Surface(savedSurfaceTexture);
+                            mediaPlayer.setSurface(surface);
                         }
-                        surface = new Surface(savedSurfaceTexture);
-                        mediaPlayer.setSurface(surface);
-                    }
-                    break;
-                case HANDLER_RELEASE:
-                    mediaPlayer.release();
-                    break;
+                        break;
+                    case HANDLER_RELEASE:
+                        mediaPlayer.release();
+                        break;
+                }
             }
         }
     }
-}

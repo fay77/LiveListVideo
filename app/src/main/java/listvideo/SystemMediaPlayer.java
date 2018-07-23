@@ -2,6 +2,7 @@ package listvideo;
 
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.util.Log;
 import android.view.Surface;
 
 public class SystemMediaPlayer extends BaseMediaPlayer implements MediaPlayer.OnPreparedListener,
@@ -51,7 +52,17 @@ public class SystemMediaPlayer extends BaseMediaPlayer implements MediaPlayer.On
 
     @Override
     public boolean isPlaying() {
-        return mediaPlayer.isPlaying();
+        try {
+            if (mediaPlayer != null) {
+                return mediaPlayer.isPlaying();
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+
+        }
     }
 
     @Override
@@ -120,6 +131,7 @@ public class SystemMediaPlayer extends BaseMediaPlayer implements MediaPlayer.On
                 if (ListVideoPlayerManager.getCurrentVideo() != null) {
                     ListVideoPlayerManager.getCurrentVideo()
                             .onCompletion();
+                    Log.d("gaofeng", "onCompletion 调用了！");
                 }
             }
         });

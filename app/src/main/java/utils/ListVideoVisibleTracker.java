@@ -200,6 +200,7 @@ public class ListVideoVisibleTracker {
                         if (CommonUtil.isCollectionEmpty(rectViews) || getScreenView() == null ||
                                 !VideoUtil.isWifiConnected(
                                 getScreenView().getContext())) {
+                            Log.d("gaofeng", "call  !VideoUtil.isWifiConnected ");
                             ListVideoPlayerManager.releaseAllVideos();
                         } else {
                             RectView nestRectView = null;

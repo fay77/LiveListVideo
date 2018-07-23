@@ -28,6 +28,7 @@ import com.example.hunliji.livelistvideoplayer.R;
 
 import java.lang.ref.WeakReference;
 
+import utils.CommonUtil;
 import utils.VideoUtil;
 
 
@@ -132,6 +133,10 @@ public class ListVideoPlayer extends FrameLayout {
     }
 
     public void enterFullScreen() {
+
+
+
+
         if (currentMode == Mode.FULL_SCREEN)
             return;
         currentMode = Mode.FULL_SCREEN;
@@ -144,11 +149,12 @@ public class ListVideoPlayer extends FrameLayout {
         Log.d("fff", "进入全屏了" + currentMode);
 
         // 隐藏ActionBar、状态栏，并横屏
-        //        NiceUtil.hideActionBar(mContext);
+//                NiceUtil.hideActionBar(mContext);
         //        NiceUtil.scanForActivity(mContext)
         //                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        VideoUtil.scanForActivity(getContext())
-                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//        VideoUtil.scanForActivity(getContext())
+//                .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        CommonUtil.hideActionBar(getContext());
         ViewGroup contentView = (ViewGroup) VideoUtil.scanForActivity(getContext())
                 .findViewById(android.R.id.content);
         if (currentMode == Mode.TINY_SCREEN) {
@@ -163,10 +169,19 @@ public class ListVideoPlayer extends FrameLayout {
             viewGroup.removeView(textureContainer);
         }
         contentView.addView(textureContainer, params);
+        mControllerView.setRotation(90);
+        if (MediaManager.INSTANCE()
+                .getTextureView() != null) {
+            MediaManager.INSTANCE().getTextureView().setRotation(90);
+        }
+        ViewGroup.LayoutParams layoutParams = mControllerView.getLayoutParams();
+        layoutParams.width = CommonUtil.getDeviceSize(getContext()).y;
+        layoutParams.height = CommonUtil.getDeviceSize(getContext()).x;
 
     }
 
     public boolean exitFullScreen() {
+
         if (currentMode == Mode.FULL_SCREEN) {
             currentMode = Mode.TINY_SCREEN;
             if (onModeChangeListener != null) {
@@ -177,6 +192,8 @@ public class ListVideoPlayer extends FrameLayout {
             //            NiceUtil.scanForActivity(mContext)
             //                    .setRequestedOrientation(ActivityInfo
             // .SCREEN_ORIENTATION_PORTRAIT);
+            CommonUtil.showActionBar(getContext());
+
             VideoUtil.scanForActivity(getContext())
                     .setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             ViewGroup contentView = (ViewGroup) VideoUtil.scanForActivity(getContext())
@@ -186,6 +203,17 @@ public class ListVideoPlayer extends FrameLayout {
                     ViewGroup.LayoutParams.MATCH_PARENT);
             viewGroup.addView(textureContainer, params);
             //            this.addView(textureContainer, params);
+            mControllerView.setRotation(0);
+            if (MediaManager.INSTANCE()
+                    .getTextureView() != null) {
+                MediaManager.INSTANCE().getTextureView().setRotation(0);
+            }
+
+            LayoutParams layoutParams = new LayoutParams(ViewGroup
+                    .LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    Gravity.CENTER);
+            mControllerView.setLayoutParams(layoutParams);
 
 
 

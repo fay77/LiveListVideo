@@ -7,13 +7,10 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 
 import com.example.hunliji.livelistvideoplayer.R;
 
@@ -28,7 +25,7 @@ import utils.CommonUtil;
 /**
  * Created by jing_tian on 2018/7/19.
  */
-public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHolder>  {
+public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHolder> {
 
     private List<String> mUrls;
     private Context mContext;
@@ -58,7 +55,7 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final ViewHolder holder, final int position) {
 
         if (TextUtils.isEmpty(mUrls.get(position))) {
             return;
@@ -66,12 +63,15 @@ public class LiveListAdapter extends RecyclerView.Adapter<LiveListAdapter.ViewHo
         holder.listVideoPlayer.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (ListVideoPlayerManager.getCurrentMode() == ListVideoPlayer.Mode.FULL_SCREEN) {
                     Toast.makeText(mContext, "hhhh", Toast.LENGTH_SHORT)
                             .show();
                     return;
                 }
                 holder.listVideoPlayer.startVideo();
+
+
             }
         });
 

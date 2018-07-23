@@ -8,6 +8,9 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ContextThemeWrapper;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.Display;
@@ -71,6 +74,37 @@ public class CommonUtil {
             e.printStackTrace();
         }
         return str;
+    }
+    private static AppCompatActivity getAppCompActivity(Context context) {
+        if (context == null) return null;
+        if (context instanceof AppCompatActivity) {
+            return (AppCompatActivity) context;
+        } else if (context instanceof ContextThemeWrapper) {
+            return getAppCompActivity(((ContextThemeWrapper) context).getBaseContext());
+        }
+        return null;
+    }
+    public static void showActionBar(Context context) {
+        ActionBar ab = getAppCompActivity(context).getSupportActionBar();
+        if (ab != null) {
+            ab.setShowHideAnimationEnabled(false);
+            ab.show();
+        }
+        VideoUtil.scanForActivity(context)
+                .getWindow()
+                .clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    }
+
+    public static void hideActionBar(Context context) {
+        ActionBar ab = getAppCompActivity(context).getSupportActionBar();
+        if (ab != null) {
+            ab.setShowHideAnimationEnabled(false);
+            ab.hide();
+        }
+        VideoUtil.scanForActivity(context)
+                .getWindow()
+                .setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     public static boolean isNetworkConnected(Context context) {

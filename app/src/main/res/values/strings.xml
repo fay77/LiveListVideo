@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">LiveListVideoPlayer</string>
+    <string name="label_select_video_trim">拖动选择你要剪裁的片段</string>
+    <string name="label_select_video">选择视频</string>
+    <string name="evp_submit">SUBMIT</string>
+    <string name="evp_retry">RETRY</string>
+    <string name="title_activity_video_preview">预览</string>
+    <string name="msg_video_trans_coding">我们需要一定时间完成视频转码。在转码完成后，用户即可看到你发布的视频</string>
+    <string name="title_activity_video_trim">剪辑视频</string>
+    <string name="label_confirm">确认</string>
+    <string name="label_continue">继续</string>
+    <string name="msg_error_video_to_short">视频时长太短啦\n5秒以下的视频暂时无法上传</string>
+    <string name="msg_error_video_to_long">视频时长超过限制啦\n10分钟以上的视频暂时无法导入剪辑</string>
+    <string name="msg_confirm_quit_video_trim">是否放弃裁剪视频？</string>
+    <string name="label_continue_edit">继续编辑</string>
+    <string name="msg_video_to_short">至少录制5秒哟~</string>
+    <string name="label_current_duration">已选取</string>
+    <string name="label_current_duration2">秒，拖动进行编辑</string>
+    <string name="label_finish">完成</string>
+    <string name="msg_fail_to_open_camera">打开相机失败,请检查应用的权限设置</string>
+    <string name="msg_confirm_quit_video_take">是否放弃已录制的视频？</string>
+    <string name="msg_cannot_retrieve_selected_video">导入视频失败</string>
+    <string name="msg_taking_video_error">视频录制失败，请重新录制</string>
+    <string name="msg_wifi_state">现在不是wifi环境，发视频动态较耗费流量，是否继续发送</string>
+    <string name="label_continue_publish">继续发送</string>
+    <string name="hint_net_disconnected">网络有点不顺畅，再试试~</string>
+    <string name="label_import_video">导入视频</string>
+    <string name="label_video_hint">对准有趣的画面，点击拍摄键开始拍摄~</string>
 </resources>
